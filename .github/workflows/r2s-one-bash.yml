@@ -1,0 +1,202 @@
+name: R2S ONE BASH
+on:
+  schedule:
+    - cron: '00 16 * * *'
+  watch:
+    types: started
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  OpenWrt-18_06_SU:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: setup SSH keys and known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        ssh-add - <<< "${{ secrets.ID_RSA }}"
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: clone R2S_ONE_BASH
+      # clone 一个私有仓库
+      run: |
+        cd "/home/runner"
+        git clone git@github.com:Quzard/R2S_ONE_BASH.git
+      # 设置一下 env，就可以使用密钥了
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: Build
+      run: |
+        cd "/home/runner/R2S_ONE_BASH"
+        sudo chmod 777 one_openwrt.sh
+        bash one_openwrt.sh "su" "18"
+        DIR="su"
+        SEED="1806"
+        cp -f "$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+    - name: Upload OpenWrt-18.06 SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+  OpenWrt-18_06_Lab:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: setup SSH keys and known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        ssh-add - <<< "${{ secrets.ID_RSA }}"
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: clone R2S_ONE_BASH
+      # clone 一个私有仓库
+      run: |
+        cd "/home/runner"
+        git clone git@github.com:Quzard/R2S_ONE_BASH.git
+      # 设置一下 env，就可以使用密钥了
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: Build
+      run: |
+        cd "/home/runner/R2S_ONE_BASH"
+        sudo chmod 777 one_openwrt.sh
+        bash one_openwrt.sh "lab" "18"
+        DIR="lab"
+        SEED="1806"
+        cp -f "$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+    - name: Upload OpenWrt-18.06 SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+  OpenWrt-Snapshot-Lab:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: setup SSH keys and known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        ssh-add - <<< "${{ secrets.ID_RSA }}"
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: clone R2S_ONE_BASH
+      # clone 一个私有仓库
+      run: |
+        cd "/home/runner"
+        git clone git@github.com:Quzard/R2S_ONE_BASH.git
+      # 设置一下 env，就可以使用密钥了
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: Build
+      run: |
+        cd "/home/runner/R2S_ONE_BASH"
+        sudo chmod 777 one_openwrt.sh
+        bash one_openwrt.sh "lab" "19"
+        DIR="lab"
+        SEED="snapshot"
+        cp -f "$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+    - name: Upload OpenWrt-snapshot SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+  OpenWrt-Snapshot-SU:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: setup SSH keys and known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        ssh-add - <<< "${{ secrets.ID_RSA }}"
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: clone R2S_ONE_BASH
+      # clone 一个私有仓库
+      run: |
+        cd "/home/runner"
+        git clone git@github.com:Quzard/R2S_ONE_BASH.git
+      # 设置一下 env，就可以使用密钥了
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    - name: Build
+      run: |
+        cd "/home/runner/R2S_ONE_BASH"
+        sudo chmod 777 one_openwrt.sh
+        bash one_openwrt.sh "su" "19"
+        DIR="su"
+        SEED="snapshot"
+        cp -f "$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+    - name: Upload OpenWrt-snapshot SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+
+  Cleanup-Old-Artifacts:
+    needs: [OpenWrt-18_06_SU,OpenWrt-18_06_Lab,OpenWrt-Snapshot-Lab,OpenWrt-Snapshot-SU]
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Cleanup Old Action Artifacts
+      uses: kolpav/purge-artifacts-action@v1
+      with:
+        token: ${{ github.token }}
+        expire-in: 7d
+  Cleanup-Workflow-Runs:
+    needs: Cleanup-Old-Artifacts
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Cleanup Workflow Runs
+      uses: GitRML/delete-workflow-runs@v1.2.1
+      with:
+        token: ${{ github.token }}
+        repository: ${{ github.repository }}
+        retain_days: 7

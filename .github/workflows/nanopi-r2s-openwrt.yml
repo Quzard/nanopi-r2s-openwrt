@@ -1,0 +1,245 @@
+name: NanoPi R2S OpenWrt
+on:
+  schedule:
+    - cron: '00 16 * * *'
+  watch:
+    types: started
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  OpenWrt-18_06_SU:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: Clone Source
+      run: |
+        cd "/home/runner"
+        git clone --branch "openwrt-18.06-k5.4" --single-branch "https://github.com/project-openwrt/openwrt" "openwrt"
+        sudo chown -R runner:runner "openwrt"
+        cd "/home/runner/openwrt"
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        patch -p1 < "${GITHUB_WORKSPACE}/patches/1806-modify_for_r2s.patch"
+        cp -f "${GITHUB_WORKSPACE}/config.sh" config.sh
+        sudo chmod 777 config.sh
+        ./config.sh  "su" "18"
+    - name: Build OpenWrt-18.06
+      run: |
+        cd "/home/runner/openwrt"
+        make defconfig
+        make -j$[$(nproc)+1]
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../su-18.06-sha256sums"
+    - name: Rebuild OpenWrt-18.06 to Collect Error Log
+      if: failure()
+      run: |
+        cd "/home/runner/openwrt"
+        make -j1 V=s
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../su-18.06-sha256sums"
+    - name: Upload OpenWrt-18.06 SHA256SUM Hash
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-18.06-sha256sums
+        path: /home/runner/su-18.06-sha256sums
+    - name: Upload OpenWrt-18.06 EXT4 Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+        path: /home/runner/su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+    - name: Upload OpenWrt-18.06 SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+  OpenWrt-18_06_Lab:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: Clone Source
+      run: |
+        cd "/home/runner"
+        git clone --branch "openwrt-18.06-k5.4" --single-branch "https://github.com/project-openwrt/openwrt" "openwrt"
+        sudo chown -R runner:runner "openwrt"
+        cd "/home/runner/openwrt"
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        patch -p1 < "${GITHUB_WORKSPACE}/patches/1806-modify_for_r2s.patch"
+        cp -f "${GITHUB_WORKSPACE}/config.sh" config.sh
+        sudo chmod 777 config.sh
+        ./config.sh "lab" "18"
+    - name: Build OpenWrt-18.06
+      run: |
+        cd "/home/runner/openwrt"
+        make defconfig
+        make -j$[$(nproc)+1]
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../lab-18.06-sha256sums"
+    - name: Rebuild OpenWrt-18.06 to Collect Error Log
+      if: failure()
+      run: |
+        cd "/home/runner/openwrt"
+        make -j1 V=s
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../lab-18.06-sha256sums"
+    - name: Upload OpenWrt-18.06 SHA256SUM Hash
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-18.06-sha256sums
+        path: /home/runner/lab-18.06-sha256sums
+    - name: Upload OpenWrt-18.06 EXT4 Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+        path: /home/runner/lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+    - name: Upload OpenWrt-18.06 SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+  OpenWrt-Snapshot-Lab:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: Clone Source
+      run: |
+        cd "/home/runner"
+        git clone --branch "master" --single-branch "https://github.com/project-openwrt/openwrt" "openwrt"
+        sudo chown -R runner:runner "openwrt"
+        cd /home/runner/openwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        patch -p1 < "${GITHUB_WORKSPACE}/patches/snapshot-modify_for_r2s.patch"
+        cp -f "${GITHUB_WORKSPACE}/config.sh" config.sh
+        sudo chmod 777 config.sh
+        ./config.sh "lab" "19"
+    - name: Build OpenWrt-Snapshot
+      run: |
+        cd /home/runner/openwrt
+        make defconfig
+        make -j$[$(nproc)+1]
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../lab-snapshot-sha256sums"
+    - name: Rebuild OpenWrt-Snapshot to Collect Error Log
+      if: failure()
+      run: |
+        cd /home/runner/openwrt
+        make -j1 V=s
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../lab-snapshot-sha256sums"
+    - name: Upload OpenWrt-Snapshot SHA256SUM Hash
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-snapshot-sha256sums
+        path: /home/runner/lab-snapshot-sha256sums
+    - name: Upload OpenWrt-Snapshot EXT4 Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+        path: /home/runner/lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+    - name: Upload OpenWrt-Snapshot SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+  OpenWrt-Snapshot-SU:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Init Building Dependencies
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        bash Init_Building_Dependencies.sh
+    - name: Clone Source
+      run: |
+        cd "/home/runner"
+        git clone --branch "master" --single-branch "https://github.com/project-openwrt/openwrt" "openwrt"
+        sudo chown -R runner:runner "openwrt"
+        cd /home/runner/openwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        patch -p1 < "${GITHUB_WORKSPACE}/patches/snapshot-modify_for_r2s.patch"
+        cp -f "${GITHUB_WORKSPACE}/config.sh" config.sh
+        sudo chmod 777 config.sh
+        ./config.sh "su" "19"
+    - name: Build OpenWrt-Snapshot
+      run: |
+        cd /home/runner/openwrt
+        make defconfig
+        make -j$[$(nproc)+1]
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../su-snapshot-sha256sums"
+    - name: Rebuild OpenWrt-Snapshot to Collect Error Log
+      if: failure()
+      run: |
+        cd /home/runner/openwrt
+        make -j1 V=s
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        mv -f "bin/targets/rockchip/armv8/sha256sums" "../su-snapshot-sha256sums"
+    - name: Upload OpenWrt-Snapshot SHA256SUM Hash
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-snapshot-sha256sums
+        path: /home/runner/su-snapshot-sha256sums
+    - name: Upload OpenWrt-Snapshot EXT4 Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+        path: /home/runner/su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz
+    - name: Upload OpenWrt-Snapshot SquashFS Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+        path: /home/runner/su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
+
+  Cleanup-Old-Artifacts:
+    needs: [OpenWrt-18_06_SU,OpenWrt-18_06_Lab,OpenWrt-Snapshot-Lab,OpenWrt-Snapshot-SU]
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Cleanup Old Action Artifacts
+      uses: kolpav/purge-artifacts-action@v1
+      with:
+        token: ${{ github.token }}
+        expire-in: 7d
+  Cleanup-Workflow-Runs:
+    needs: Cleanup-Old-Artifacts
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Cleanup Workflow Runs
+      uses: GitRML/delete-workflow-runs@v1.2.1
+      with:
+        token: ${{ github.token }}
+        repository: ${{ github.repository }}
+        retain_days: 7
