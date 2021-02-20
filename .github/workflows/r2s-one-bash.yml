@@ -44,7 +44,7 @@ jobs:
         bash one_openwrt.sh "su" "18"
         DIR="su"
         SEED="1806"
-        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "/home/runner/su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
     - name: Upload OpenWrt-18.06 SquashFS Firmware
       uses: actions/upload-artifact@v2
       with:
@@ -87,7 +87,7 @@ jobs:
         bash one_openwrt.sh "lab" "18"
         DIR="lab"
         SEED="1806"
-        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "/home/runner/lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
     - name: Upload OpenWrt-18.06 SquashFS Firmware
       uses: actions/upload-artifact@v2
       with:
@@ -130,7 +130,7 @@ jobs:
         bash one_openwrt.sh "lab" "19"
         DIR="lab"
         SEED="snapshot"
-        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "/home/runner/lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
     - name: Upload OpenWrt-snapshot SquashFS Firmware
       uses: actions/upload-artifact@v2
       with:
@@ -173,7 +173,7 @@ jobs:
         bash one_openwrt.sh "su" "19"
         DIR="su"
         SEED="snapshot"
-        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
+        cp -f "~/$DIR-openwrt-$SEED-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "/home/runner/su-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
     - name: Upload OpenWrt-snapshot SquashFS Firmware
       uses: actions/upload-artifact@v2
       with:
