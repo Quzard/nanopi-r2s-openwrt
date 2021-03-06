@@ -9,6 +9,7 @@ on:
 
 jobs:
   OpenWrt-18_06_SU:
+    timeout-minutes: 1200
     runs-on: ubuntu-18.04
     steps:
     - name: Checkout Repository
@@ -53,6 +54,7 @@ jobs:
         path: /home/runner/su-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
 
   OpenWrt-18_06_Lab:
+    timeout-minutes: 1200
     runs-on: ubuntu-18.04
     steps:
     - name: Checkout Repository
@@ -97,6 +99,7 @@ jobs:
         path: /home/runner/lab-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
 
   OpenWrt-Snapshot-Lab:
+    timeout-minutes: 1200
     runs-on: ubuntu-18.04
     steps:
     - name: Checkout Repository
@@ -141,6 +144,7 @@ jobs:
         path: /home/runner/lab-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
 
   OpenWrt-Snapshot-SU:
+    timeout-minutes: 1200
     runs-on: ubuntu-18.04
     steps:
     - name: Checkout Repository
@@ -186,6 +190,7 @@ jobs:
 
 
   Cleanup-Old-Artifacts:
+    timeout-minutes: 1200
     needs: [OpenWrt-18_06_SU,OpenWrt-18_06_Lab,OpenWrt-Snapshot-Lab,OpenWrt-Snapshot-SU]
     runs-on: ubuntu-18.04
     steps:
@@ -195,6 +200,7 @@ jobs:
         token: ${{ github.token }}
         expire-in: 7d
   Cleanup-Workflow-Runs:
+    timeout-minutes: 1200
     needs: Cleanup-Old-Artifacts
     runs-on: ubuntu-18.04
     steps:
